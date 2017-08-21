@@ -1,32 +1,28 @@
-  var React = require('react');
-  var PropTypes  = require('prop-types');
-  var api = require('../utils/api');
-  var Loading = require('./Loading');
+  const React = require('react');
+  const PropTypes  = require('prop-types');
+  const api = require('../utils/api');
+  const Loading = require('./Loading');
 
-  function SelectedLanguage (props) {
-    var languages = ['All', 'JavaScript', 'Ruby', 'Java', 'CSS', 'Python'];
-
+  function SelectedLanguage ({ selectedLanguage, onSelect }) {
+    const languages = ['All', 'JavaScript', 'Ruby', 'Java', 'CSS', 'Python'];
     return (
       <ul className="languages">
-        {languages.map(function (lang) {
-          return (
+        {languages.map((lang) => (
             <li
-              style={lang === props.selectedLanguage ? { color: '#d0021b'}: null }
-              onClick={props.onSelect.bind(null, lang)}
+              style={lang === selectedLanguage ? { color: '#d0021b'}: null }
+              onClick={() => onSelect(lang)}
               key={lang}>
               {lang}
             </li>
-          )
-        })}
+          ))}
       </ul>
     )
   }
 
-  function RepoGrid(props) {
+  function RepoGrid({ repos }) {
     return (
         <ul className='popular-list'>
-          {props.repos.map(function (repo, index) {
-            return (
+          {repos.map(({ name, stargazers_count,owner, html_url  },index) => (
             <li key={repo.name} className='popular-item'>
               <div className='popular-rank'>#{ index + 1 }</div>
               <ul className='space-list-items'>
@@ -41,8 +37,7 @@
                 <li>{repo.stargazers_count} stars</li>
               </ul>
             </li>
-          )
-        })}
+          ))}
       </ul>
     )
   }
@@ -73,35 +68,27 @@
     }
 
     updateLanguage(lang) {
-        this.setState(function () {
-          return {
+        this.setState(() => ({
             selectedLanguage: lang,
             repos: null
-          }
-        });
+        }));
 
         api.fetchPopularRepos(lang)
-        .then(function (repos) {
-          this.setState(function () {
-            return {
-              repos: repos
-            }
-          })
-        }.bind(this));
+        .then((repos) => this.setState(() => ({ repos })));
       }
 
     render() {
-
+      const {selectedLanguage, repos } = this.state
 
       return (
         <div>
           <SelectedLanguage
-          selectedLanguage={this.state.selectedLanguage}
+          selectedLanguage={selectedLanguage}
           onSelect={this.updateLanguage}
           />
-          {!this.state.repos
+          {!repos
             ? <Loading />
-            : <RepoGrid repos={this.state.repos} />}
+            : <RepoGrid repos={repos} />}
           </div>
       )
     }
